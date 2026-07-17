@@ -1,4 +1,4 @@
-# Analysis Code — *Impact of dynamic atmospheric correction choice on SWOT sea surface height over continental shelves: a case study in the Southwestern Atlantic*
+# Analysis Code — *On the Accuracy of SWOT Sea Surface Height Over Large Continental Shelves*
 
 **Authors:** Cornejo-Guzmán S.E., Saraceno M., Ruiz-Etcheverry L.A., Birol F., Lyard F.
 
@@ -6,46 +6,63 @@
 
 ## Overview
 
-This repository contains the scripts used to perform the tidal and atmospheric correction assessment, satellite/in-situ validation, spectral analysis, and spatiotemporal characterization of coastally trapped waves presented in the manuscript above.
+This repository contains the scripts used in the manuscript above to validate SWOT L3 sea surface height over the Argentine Continental Shelf against five in situ records located under pass 007 during the 1-day CalVal phase. The analysis covers:
 
-The analysis combines **MATLAB** scripts (validation statistics, spectral analysis, CEOF decomposition) and **Python** scripts (tidal constituent extraction and tidal elevation prediction).
+- the assessment of five tide models (FES2022b, TPXO10-atlas-v2, EOT20, GOT5.5, and the regional MSAS) against in situ harmonic constituents;
+- the intercomparison of inverse-barometer (IB) references built from different atmospheric pressure products;
+- the cross-spectral assessment (coherence, phase lag, variance ratio) of five dynamic atmospheric correction (DAC) products against a common ERA5-MSLP IB reference, on both the SWOT and the in situ sides;
+- the spatiotemporal characterization of coastal trapped waves (Hovmöller diagrams, Lomb-Scargle spectral analysis, phase velocities) in the 2–10-day band;
+- the validation of SWOT-derived geostrophic velocities against a bottom-mounted Aquadopp current profiler.
+
+The repository combines **MATLAB** scripts (validation statistics, cross-spectral analysis, Hovmöller/spectral analysis, figure generation) and **Python** scripts (tidal constituent extraction and prediction, and the SWOT–ADCP computation engine).
 
 ---
 
 ## Repository Contents
 
-### Python scripts
+### `figures/` — manuscript figures
+
+Each script saves its figure under the same name as the manuscript figure it produces (`Fig01.png` … `Fig08.png`, `FigS1.png` … `FigS3.png`; `Fig05.m` saves its three panels as `Fig05a/b/c`). Scripts named `FigS*_SI.m` generate the Supporting Information (SI) figures.
 
 | File | Description |
 |---|---|
-| `extract_insitu_harmonics_pyfes.py` | Performs harmonic analysis on in-situ SSH time series using **pyFES** to extract tidal constituents at each station. |
-| `tidesFES2022bconstituents.py` | Extracts tidal harmonic constituents (amplitude and phase) from the **FES2022b** global model at each station using **pyTMD**. |
+| `Fig01.m` | Study-area map: SWOT passes 007/022 swaths and conventional altimetry SLA over the Southwestern Atlantic, with the in situ stations and the 200-m isobath. |
+| `Fig02.m` | Total Root Sum Square (RSS) misfit of the five tide models against in situ constituents (pyFES harmonic analysis), grouped bar chart per station plus summary table. |
+| `Fig03.m` | Skill of the inverse-barometer series built from different pressure products (ERA5 MSLP, CFSv2, ECMWF IFS HRES, ERA5 sp) against the SWOT L2 IB reference: correlation, RMSE, centred RMSD, and variability ratio per station. |
+| `Fig04.m` | Cross-spectral synthesis of SWOT vs in situ SSHA per correction: mean squared coherence (2–10 d), coherence-weighted phase lag, and variance ratio. |
+| `Fig05.m` | R² bubble maps of SWOT vs in situ SSHA: (a) no correction, (b) tide + IB, (c) the five DAC products per station. |
+| `Fig06.m` | Latitude–time Hovmöller of high-pass-filtered SSHA (IB-only) with coastal-trapped-wave phase-velocity estimates; manual axes/date-tick layout. |
+| `Fig07.m` | Same pipeline as `Fig06.m` in a two-panel subplot layout, with extended per-latitude Lomb-Scargle diagnostics (peak-rank medians and spectral energy partition) printed to the console. |
+| `Fig08.m` | SWOT-derived geostrophic velocities vs Aquadopp currents under the tide + IB correction: time series and spatial/temporal-filter sensitivity (plots the output of `compute_swot_adcp_inputs.py`). |
+| `FigS1_SI.m` | Supporting Information Figure S1. Cross-spectral assessment of the five DACs against the ERA5-MSLP IB reference per station: coherence of the correction difference, weighted phase lag, and fractional variance reduction (in situ and SWOT sides). |
+| `FigS2_SI.m` | Supporting Information Figure S2. Hovmöller diagrams of DAC-corrected SSHA (six panels: IB-only plus five DACs) showing the degradation of the coastal-trapped-wave signal. |
+| `FigS3_SI.m` | Supporting Information Figure S3. Counterpart of `Fig08.m` under the tide + full DAC correction, same axes for direct contrast. |
+| `compute_swot_adcp_inputs.py` | Computation engine for `Fig08.m`/`FigS3_SI.m`: ADCP tide removal (pyFES), Ekman-depth estimate from ERA5 winds, barotropic reference velocity, and the spatial × temporal × barotropic-fraction sweep against SWOT geostrophic velocities. Exports a `.mat` file consumed by the MATLAB plotting scripts. |
+
+### `tides/` — tidal constituent extraction and prediction
+
+| File | Description |
+|---|---|
+| `extract_insitu_harmonics_pyfes.py` | Harmonic analysis of the in situ SSH time series using **pyFES** to extract tidal constituents at each station. |
+| `tidesFES2022bconstituents.py` | Extracts tidal constituents (amplitude and phase) from the **FES2022b** global model at each station using **pyTMD**. |
 | `tidesTPXO10v2constituents.py` | Extracts constituents from the **TPXO10-atlas-v2** model using **pyTMD**. |
 | `tidesEOT20constituents.py` | Extracts constituents from the **EOT20** global ocean tide model using **pyTMD**. |
 | `tidesGOT55constituents.py` | Extracts constituents from **GOT5.5**, combining ocean and load tides via complex addition. |
 | `tidesfromFES2022b.py` | Generates high-resolution (1-minute) tidal elevation time series for each station over the SWOT CalVal period using **FES2022b** via **pyTMD**. |
-
-### MATLAB scripts
-
-| File | Description |
-|---|---|
-| `evaluate_tidal_rss_misfit.m` | Computes Root Sum Square (RSS) misfits between modelled and in-situ tidal constituents for all five tidal models and five stations. Produces the bar chart figure and an Excel summary table. |
-| `evaluate_swot_insitu_stats.m` | Computes Pearson correlation (*r*), RMSE, and R² between SWOT and in-situ SSHA for each DAC configuration. Applies iterative variance-based quality control and exports time-series figures and a statistics summary. |
-| `compute_swot_insitu_spectra.m` | Computes variance-preserving Power Spectral Density (PSD) estimates for each station and a regional composite using Welch's method with a Tukey window. Includes red-noise significance testing via a first-order autoregressive model. |
-| `analyze_swot_ceof_hovmoller.m` | Applies multi-step high-pass filtering (adapted from Dinápoli et al., 2025), performs Complex EOF (CEOF) decomposition, and constructs Hovmöller diagrams for the default and SIROCCO-corrected SSHA fields. |
-| `EOF_.m` | Helper function implementing SVD-based EOF decomposition, used by `analyze_swot_ceof_hovmoller.m`. |
 
 ---
 
 ## Dependencies
 
 ### Python
-- [`pyFES`](https://github.com/CNES/aviso-fes) — harmonic analysis
+- [`pyFES`](https://github.com/CNES/aviso-fes) — harmonic analysis and tide removal
 - [`pyTMD`](https://github.com/tsutterley/pyTMD) — tidal model extraction and prediction
-- `numpy`, `pandas`
+- `numpy`, `pandas`, `scipy`, `xarray`
+- `tqdm` (optional, progress bars)
 
 ### MATLAB
-- MATLAB R2021b or later (Signal Processing Toolbox for `filtfilt`, `butter`)
+- MATLAB R2021b or later (Signal Processing Toolbox for `filtfilt`, `butter`, `mscohere`, `cpsd`)
+- [`m_map`](https://www.eoas.ubc.ca/~rich/map.html) mapping toolbox (map figures)
 
 ### Tidal model files (not included)
 The following model directories must be provided locally:
@@ -57,11 +74,13 @@ The following model directories must be provided locally:
 | EOT20 | `tide_models/` |
 | GOT5.5 | `tide_models/GOT5.5/` |
 
+Input data (SWOT L3 swaths, in situ series, ADCP, ERA5 fields) are not distributed with this repository; see the Open Research section of the manuscript for the data sources.
+
 ---
 
 ## Stations
 
-All scripts operate on the five in-situ stations used in the study:
+All scripts operate on the five in situ stations used in the study:
 
 | Station | Longitude | Latitude |
 |---|---|---|
