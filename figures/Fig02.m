@@ -1,10 +1,8 @@
 %% Tidal Harmonic Validation: Root Sum Square (RSS) Misfit
-% Description:
-%   Evaluates the accuracy of global and regional tidal models against 
-%   in-situ harmonic constituents derived from pyFES. The script identifies 
-%   the common constituents across all datasets for each station and computes 
-%   the Total Root Sum Square (RSS) misfit. Results are synthesized into a 
-%   single grouped bar chart and exported as a tabular summary.
+% Evaluates global and regional tidal models against in-situ harmonic
+% constituents derived from pyFES. Uses the common constituents across all
+% datasets at each station, computes the total RSS misfit, and exports a
+% grouped bar chart plus a summary table.
 
 clear; close all; clc;
 
@@ -19,7 +17,7 @@ params.dpi           = 600;
 params.font_name     = 'Times New Roman';
 params.font_size     = 12;
 
-% Model colors defined by the user
+% Model colors
 colors = [
     195, 195, 195;  % FES2022
      26, 224, 217;  % TPXO10v2
@@ -31,7 +29,7 @@ colors = [
 model_names = {'FES2022', 'TPXO10v2', 'EOT20', 'GOT5.5', 'MSAS'};
 
 %% 2. Station Definitions
-% Struct mapping the specific filenames and CSV search keys for each station
+% Filenames and CSV search keys for each station
 stations = struct(...
     'name', {'Carina', 'Lander', 'P. Deseado', 'Vega-Pleyade', 'San Matias'}, ...
     'csv_key', {'carina', 'lander', 'puerto deseado', 'vega-pleyade', 'sbe26 san matias'}, ...
@@ -79,9 +77,7 @@ reg_vars = T_reg_full.Properties.VariableNames;
 reg_constituents = lower(string(T_reg_full{:, 1}));
 
 %% 4. Iterative Processing per Station
-fprintf('\n------------------------------------------------------------\n');
-fprintf('Computing RSS Misfits\n');
-fprintf('------------------------------------------------------------\n');
+fprintf('\nComputing RSS misfits...\n');
 
 for s = 1:num_stations
     st = stations(s);
@@ -168,9 +164,7 @@ for s = 1:num_stations
 end
 
 %% 5. Global Visualization
-fprintf('\n------------------------------------------------------------\n');
-fprintf('Generating Consolidated Figure\n');
-fprintf('------------------------------------------------------------\n');
+fprintf('\nGenerating figure...\n');
 
 fig = figure('Visible', 'off', 'Color', 'w', 'Units', 'centimeters', ...
              'Position', [1, 1, params.fig_width_cm, params.fig_height_cm]);
@@ -206,9 +200,9 @@ for s = 1:num_stations
 end
 
 % Export figure
-fig_filename = fullfile(dirs.output, 'Fig_Global_Total_RSS_Misfit.png');
+fig_filename = fullfile(dirs.output, 'Fig02.png');
 print(fig, fig_filename, '-dpng', sprintf('-r%d', params.dpi));
-fprintf('Figure saved successfully: %s\n', fig_filename);
+fprintf('Figure saved: %s\n', fig_filename);
 close(fig);
 
 %% 6. Tabular Export
@@ -216,6 +210,4 @@ T_export = array2table(rss_results, 'VariableNames', model_names);
 T_export = [table({stations.name}', 'VariableNames', {'Station'}), T_export];
 excel_filename = fullfile(dirs.output, 'Table_Global_Total_RSS_Misfit.xlsx');
 writetable(T_export, excel_filename);
-fprintf('Data table saved successfully: %s\n', excel_filename);
-
-fprintf('\n================== ANALYSIS COMPLETED ==================\n');
+fprintf('Table saved: %s\n', excel_filename);

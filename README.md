@@ -37,6 +37,7 @@ Each script saves its figure under the same name as the manuscript figure it pro
 | `FigS1_SI.m` | Supporting Information Figure S1. Cross-spectral assessment of the five DACs against the ERA5-MSLP IB reference per station: coherence of the correction difference, weighted phase lag, and fractional variance reduction (in situ and SWOT sides). |
 | `FigS2_SI.m` | Supporting Information Figure S2. Hovmöller diagrams of DAC-corrected SSHA (six panels: IB-only plus five DACs) showing the degradation of the coastal-trapped-wave signal. |
 | `FigS3_SI.m` | Supporting Information Figure S3. Counterpart of `Fig08.m` under the tide + full DAC correction, same axes for direct contrast. |
+| `compute_swot_insitu_stats.m` | SWOT vs in situ SSHA validation statistics: variance-based quality control, common-period centring, and per-DAC r / RMSE / R² (the R² values plotted in `Fig05.m`), plus per-station SSHA comparison time series and a statistics summary table. |
 | `compute_swot_adcp_inputs.py` | Computation engine for `Fig08.m`/`FigS3_SI.m`: ADCP tide removal (pyFES), Ekman-depth estimate from ERA5 winds, barotropic reference velocity, and the spatial × temporal × barotropic-fraction sweep against SWOT geostrophic velocities. Exports a `.mat` file consumed by the MATLAB plotting scripts. |
 
 ### `tides/` — tidal constituent extraction and prediction
